@@ -2,16 +2,23 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output
 
-data = {"x": [], "y": []}
-filename = "log4.txt"
-file = open(filename, "r")
-lines = file.readlines()
 
-for line in lines:
-    data["x"].append(line.split(" ")[1].split(".")[0])
-    y = line.split("temperature: ")[1].split(",")[0]
-    data["y"].append(y[:2] + '.' + y[2:])
+def open_file(filename = "log.txt"):
+    file = open(filename, "r")
+    return file.readlines()
+
+
+def parse_log(lines):
+    data = {"timestamp": [], "temperature": []}
+    for line in lines:
+        if len(line.replace("  ", " ").split(" ")) > 15:
+            data["timestamp"].append(line.split(" ")[1].split(".")[0])
+            y = line.replace("  ", " ").split(" ")[14].replace(",", "")
+            data["temperature"].append(y[:2] + '.' + y[2:])
+    return data
+
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -25,21 +32,33 @@ app.layout = html.Div(children=[
     '''),
 
     dcc.Graph(
-        id='example-graph',
-        figure={
-            'data': [
-                {'x': data["x"],
-                 'y': data["y"],
-                 'type': 'line', 'name': 'Temp'},
-            ],
-            'layout': {
-                'title': 'Battery Temperature',
-                'yaxis': {'type': 'linear'},
-                'xaxis': {'showgrid': False}
-            }
-        }
+        id='batt-graph'
+    ),
+    dcc.Interval(
+        id='interval-component',
+        interval=5 * 1000,  # in milliseconds
+        n_intervals=0
     )
+
 ])
+
+@app.callback(Output('batt-graph', 'figure'),
+              [Input('interval-component', 'n_intervals')])
+def update_batt_graph(n):
+    lines = open_file()
+    data = parse_log(lines)
+    return {
+        'data': [
+            {'x': data["timestamp"],
+             'y': data["temperature"],
+             'type': 'line', 'name': 'Temp'},
+        ],
+        'layout': {
+            'title': 'Battery Temperature',
+            'yaxis': {'type': 'linear'},
+            'xaxis': {'showgrid': False}
+        }
+    }
 
 if __name__ == '__main__':
     app.run_server(debug=True)
