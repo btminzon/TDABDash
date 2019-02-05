@@ -62,7 +62,7 @@ def update_batt_graph(n):
         'layout': {
             'title': 'Battery Temperature',
             'yaxis': {'type': 'linear'},
-            'xaxis': {'showgrid': False}
+            'xaxis': {'showgrid': True}
         }
     }
 
@@ -81,7 +81,7 @@ def update_volt_graph(n):
         'layout': {
             'title': 'Battery Voltage',
             'yaxis': {'type': 'linear'},
-            'xaxis': {'showgrid': False}
+            'xaxis': {'showgrid': True}
         }
     }
 
