@@ -5,7 +5,8 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 
-data = {"timestamp": [], "temperature": [], "voltage": [], "current": [], "level": []}
+data = {"temperature": {"timestamp": [], "temp": []}, "voltage": {"timestamp": [], "volt": []},
+        "current": {"timestamp": [], "curr": []}, "level": {"timestamp": [], "lvl": []}}
 
 
 def parse_line(line, text):
@@ -19,20 +20,22 @@ def open_file(filename):
 
 def parse_log(lines, field):
     for line in lines:
-        if len(line) > 15:
-            data["timestamp"].append(line.split(" ")[1].split(".")[0])
-            if field is "temperature" and "temperature:" in line:
-                temperature = parse_line(line, "temperature:")
-                data["temperature"].append(temperature[:2] + '.' + temperature[2:])
-            elif field is "current" and "current_now" in line:
-                current = parse_line(line, "current_now:")
-                data["current"].append(current.replace("\n", ""))
-            elif field is "voltage" and "voltage" in line:
-                voltage = parse_line(line, "voltage:")
-                data["voltage"].append(voltage[:1] + '.' + voltage[1:])
-            elif field is "level" and "level:" in line:
-                level = parse_line(line, "level:")
-                data["level"].append(level)
+        if field is "temperature" and "temperature:" in line:
+            temperature = parse_line(line, "temperature:")
+            data["temperature"]["temp"].append(temperature[:2] + '.' + temperature[2:])
+            data["temperature"]["timestamp"].append(line.split(" ")[1].split(".")[0])
+        elif field is "current" and "current_now" in line:
+            current = parse_line(line, "current_now:")
+            data["current"]["curr"].append(current.replace("\n", ""))
+            data["current"]["timestamp"].append(line.split(" ")[1].split(".")[0])
+        elif field is "voltage" and "voltage" in line:
+            voltage = parse_line(line, "voltage:")
+            data["voltage"]["volt"].append(voltage[:1] + '.' + voltage[1:])
+            data["voltage"]["timestamp"].append(line.split(" ")[1].split(".")[0])
+        elif field is "level" and "level:" in line:
+            level = parse_line(line, "level:")
+            data["level"]["lvl"].append(level)
+            data["level"]["timestamp"].append(line.split(" ")[1].split(".")[0])
 
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -70,14 +73,14 @@ app.layout = html.Div(children=[
 @app.callback(Output('batt-graph', 'figure'),
               [Input('interval-component', 'n_intervals')])
 def update_batt_graph(n):
-    data["temperature"] = []
-    data["timestamp"] = []
+    data["temperature"]["temp"] = []
+    data["temperature"]["timestamp"] = []
     lines = open_file("log.txt")
     parse_log(lines, "temperature")
     return {
         'data': [
-            {'x': data["timestamp"],
-             'y': data["temperature"],
+            {'x': data["temperature"]["timestamp"],
+             'y': data["temperature"]["temp"],
              'type': 'line', 'name': 'Temp'},
         ],
         'layout': {
@@ -91,14 +94,14 @@ def update_batt_graph(n):
 @app.callback(Output('volt-graph', 'figure'),
               [Input('interval-component', 'n_intervals')])
 def update_volt_graph(n):
-    data["voltage"] = []
-    data["timestamp"] = []
+    data["voltage"]["volt"] = []
+    data["voltage"]["timestamp"] = []
     lines = open_file("log.txt")
     parse_log(lines, "voltage")
     return {
         'data': [
-            {'x': data["timestamp"],
-             'y': data["voltage"],
+            {'x': data["voltage"]["timestamp"],
+             'y': data["voltage"]["volt"],
              'type': 'line', 'name': 'V'},
         ],
         'layout': {
@@ -112,14 +115,14 @@ def update_volt_graph(n):
 @app.callback(Output('amp-graph', 'figure'),
               [Input('interval-component', 'n_intervals')])
 def update_amp_graph(n):
-    data["current"] = []
-    data["timestamp"] = []
+    data["current"]["curr"] = []
+    data["current"]["timestamp"] = []
     lines = open_file("logA.txt")
     parse_log(lines, "current")
     return {
         'data': [
-            {'x': data["timestamp"],
-             'y': data["current"],
+            {'x': data["current"]["timestamp"],
+             'y': data["current"]["curr"],
              'type': 'line', 'name': 'V'},
         ],
         'layout': {
@@ -133,14 +136,14 @@ def update_amp_graph(n):
 @app.callback(Output('level-graph', 'figure'),
               [Input('interval-component', 'n_intervals')])
 def update_level_graph(n):
-    data["level"] = []
-    data["timestamp"] = []
+    data["level"]["lvl"] = []
+    data["level"]["timestamp"] = []
     lines = open_file("log.txt")
     parse_log(lines, "level")
     return {
         'data': [
-            {'x': data["timestamp"],
-             'y': data["level"],
+            {'x': data["level"]["timestamp"],
+             'y': data["level"]["lvl"],
              'type': 'line', 'name': 'V'},
         ],
         'layout': {
