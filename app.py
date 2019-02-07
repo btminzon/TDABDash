@@ -81,7 +81,7 @@ def update_batt_graph(n):
         'data': [
             {'x': data["temperature"]["timestamp"],
              'y': data["temperature"]["temp"],
-             'type': 'line', 'name': 'Temp'},
+             'type': 'line', 'name': 'Temperature'},
         ],
         'layout': {
             'title': 'Battery Temperature (ºC)',
@@ -102,7 +102,7 @@ def update_volt_graph(n):
         'data': [
             {'x': data["voltage"]["timestamp"],
              'y': data["voltage"]["volt"],
-             'type': 'line', 'name': 'V'},
+             'type': 'line', 'name': 'Voltage'},
         ],
         'layout': {
             'title': 'Battery Voltage (V)',
@@ -123,7 +123,7 @@ def update_amp_graph(n):
         'data': [
             {'x': data["current"]["timestamp"],
              'y': data["current"]["curr"],
-             'type': 'line', 'name': 'V'},
+             'type': 'line', 'name': 'Current'},
         ],
         'layout': {
             'title': 'Battery Current (mA)',
@@ -144,7 +144,7 @@ def update_level_graph(n):
         'data': [
             {'x': data["level"]["timestamp"],
              'y': data["level"]["lvl"],
-             'type': 'line', 'name': 'V'},
+             'type': 'line', 'name': 'Level'},
         ],
         'layout': {
             'title': 'Battery Level (%)',
