@@ -55,6 +55,12 @@ app.layout = html.Div(children=[
     html.Div([
         dcc.Graph(id='volt-graph'),
     ], style={'display': 'inline-block', 'width': '49%'}),
+    html.Div([
+        dcc.Graph(id='amp-graph'),
+    ], style={'display': 'inline-block', 'width': '49%'}),
+    html.Div([
+        dcc.Graph(id='level-graph'),
+    ], style={'display': 'inline-block', 'width': '49%'}),
     dcc.Interval(
         id='interval-component',
         interval=5 * 1000,  # in milliseconds
@@ -68,21 +74,18 @@ app.layout = html.Div(children=[
               [Input('interval-component', 'n_intervals')])
 def update_batt_graph(n):
     data["temperature"]["temp"] = []
-    data["level"]["lvl"] = []
     data["temperature"]["timestamp"] = []
     lines = open_file("log.txt")
     parse_log(lines, "temperature")
-    parse_log(lines, "level")
     return {
         'data': [
-            {'x': data["temperature"]["timestamp"], 'y': data["temperature"]["temp"], 'type': 'line',
-             'name': 'Temperature'},
-            {'x': data["level"]["timestamp"], 'y': data["level"]["lvl"], 'type': 'line', 'name': 'Level', 'yaxis': 'y2'}
+            {'x': data["temperature"]["timestamp"],
+             'y': data["temperature"]["temp"],
+             'type': 'line', 'name': 'Temperature'},
         ],
         'layout': {
-            'title': 'Battery Temperature (ºC) / Battery Level (%)',
+            'title': 'Battery Temperature (ºC)',
             'yaxis': {'type': 'linear'},
-            'yaxis2': {'type': 'linear', 'side': 'right', 'overlaying': 'y'},
             'xaxis': {'showgrid': True}
         }
     }
@@ -92,22 +95,60 @@ def update_batt_graph(n):
               [Input('interval-component', 'n_intervals')])
 def update_volt_graph(n):
     data["voltage"]["volt"] = []
-    data["current"]["curr"] = []
     data["voltage"]["timestamp"] = []
     lines = open_file("log.txt")
     parse_log(lines, "voltage")
+    return {
+        'data': [
+            {'x': data["voltage"]["timestamp"],
+             'y': data["voltage"]["volt"],
+             'type': 'line', 'name': 'Voltage'},
+        ],
+        'layout': {
+            'title': 'Battery Voltage (V)',
+            'yaxis': {'type': 'linear'},
+            'xaxis': {'showgrid': True}
+        }
+    }
+
+
+@app.callback(Output('amp-graph', 'figure'),
+              [Input('interval-component', 'n_intervals')])
+def update_amp_graph(n):
+    data["current"]["curr"] = []
+    data["current"]["timestamp"] = []
     lines = open_file("logA.txt")
     parse_log(lines, "current")
     return {
         'data': [
-            {'x': data["voltage"]["timestamp"], 'y': data["voltage"]["volt"], 'type': 'line', 'name': 'Voltage'},
-            {'x': data["voltage"]["timestamp"], 'y': data["current"]["curr"], 'type': 'line', 'name': 'Current',
-             'yaxis': 'y2'},
+            {'x': data["current"]["timestamp"],
+             'y': data["current"]["curr"],
+             'type': 'line', 'name': 'Current'},
         ],
         'layout': {
-            'title': 'Battery Voltage (V) / Current (mA)',
+            'title': 'Battery Current (mA)',
             'yaxis': {'type': 'linear'},
-            'yaxis2': {'type': 'linear', 'side': 'right', 'overlaying': 'y'},
+            'xaxis': {'showgrid': True}
+        }
+    }
+
+
+@app.callback(Output('level-graph', 'figure'),
+              [Input('interval-component', 'n_intervals')])
+def update_level_graph(n):
+    data["level"]["lvl"] = []
+    data["level"]["timestamp"] = []
+    lines = open_file("log.txt")
+    parse_log(lines, "level")
+    return {
+        'data': [
+            {'x': data["level"]["timestamp"],
+             'y': data["level"]["lvl"],
+             'type': 'line', 'name': 'Level'},
+        ],
+        'layout': {
+            'title': 'Battery Level (%)',
+            'yaxis': {'type': 'linear'},
             'xaxis': {'showgrid': True}
         }
     }
